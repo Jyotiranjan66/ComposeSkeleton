@@ -1,37 +1,55 @@
+import java.text.SimpleDateFormat
+import java.util.*
+
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    kotlin("plugin.serialization") version "1.8.10"
-    id ("kotlin-kapt")
-    id("com.google.dagger.hilt.android")
+    id("dagger.hilt.android.plugin")
+    kotlin("android")
+    kotlin("kapt")
+    kotlin("plugin.serialization") version "1.4.10"
+//    id("com.google.firebase.crashlytics")
 }
 
 android {
-    namespace = "com.example.composeskeleton"
-    compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.composeskeleton"
-        minSdk = 24
+        val appName = "Android Skeleton"
+        val vCode = 1
+        val vName = "1.0.0"
+
+        applicationId = "com.skeleton.android"
+
+        minSdk = 23
+        compileSdk = 34
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+
+        versionCode = vCode
+        versionName = vName
 
         multiDexEnabled = true
+        buildFeatures.dataBinding = true
+
+        resValue("string", "app_name", appName)
+        manifestPlaceholders["appName"] = appName
+        base.archivesBaseName =
+            "${appName}_${vName}(v${vCode})_${SimpleDateFormat("dd-MMM-yyyy").format(Date())}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
     }
-
     buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        getByName("release") {
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
-        getByName("debug"){
+        getByName("debug") {
             isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
@@ -50,83 +68,113 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kapt {
+        correctErrorTypes = true
     }
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
+        kotlinOptions {
+            jvmTarget = "11"
         }
     }
-}
-kapt {
-    correctErrorTypes = true
 }
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
-    implementation("androidx.activity:activity-compose:1.9.0")
-    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    implementation(project(":data"))
-     implementation(project(":domain"))
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation(project(mapOf("path" to ":domain")))
+    implementation(project(mapOf("path" to ":data")))
 
-    // material
-    implementation ("com.google.android.material:material:1.12.0")
-
-    // multidex
+    //android
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.6.0")
     implementation("androidx.multidex:multidex:2.0.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
+    //kotlin
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.20")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
 
-    // api
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-
-    //room db
-    implementation ("androidx.room:room-runtime:2.5.2")
-    annotationProcessor ("androidx.room:room-compiler:2.5.2")
-    kapt ("androidx.room:room-compiler:2.5.2")
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    //play services
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.1.0")
 
     //security
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation("net.zetetic:android-database-sqlcipher:4.3.0")
 
-    // serialization
-     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+    //firebase
+    implementation(platform("com.google.firebase:firebase-bom:29.0.3"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-crashlytics")
 
-    // hilt
-    implementation("com.google.dagger:hilt-android:2.47")
-    kapt("com.google.dagger:hilt-android-compiler:2.47")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+    //media
+    implementation("io.coil-kt:coil:0.11.0")
+    implementation("com.github.jkwiecien:EasyImage:3.1.0")
+    implementation("id.zelory:compressor:3.0.1")
 
-    // coroutine
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0-RC.2")
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+    //api
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
+    //data
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+
+    //di
+    implementation("com.google.dagger:hilt-android:2.46")
+    kapt("com.google.dagger:hilt-android-compiler:2.46")
+
+    //util
+    implementation("com.github.smokelaboratory:freedom:2.0.1")
+    implementation("com.github.smokelaboratory:whereabouts:1.0.3")
+    implementation("com.github.fondesa:recycler-view-divider:3.3.0")
+
+    //testing
+    /*implementation("com.jakewharton.timber:timber:5.0.1")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("com.github.IvanShafran:shared-preferences-mock:1.1")
+    testImplementation("org.mockito:mockito-core:3.11.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.3")
+    androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
+    androidTestImplementation("androidx.room:room-testing:2.4.0")
+    androidTestImplementation("org.hamcrest:hamcrest-integration:4.4.0")
+    androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.4.0")
+    androidTestImplementation("com.jakewharton.espresso:okhttp3-idling-resource:")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")*/
+
+    /*implementation(libs.bundles.android)
+    implementation(libs.bundles.kotlin)
+    implementation(libs.bundles.playServices)
+    implementation(libs.bundles.firebase)
+    implementation(libs.bundles.image)
+    implementation(libs.permission)
+    implementation(libs.recyclerView.divider)
+    implementation(libs.bundles.retrofit)
+    implementation(libs.bundles.security)
+    implementation(libs.data.local)
+
+    //room
+    implementation(libs.room.core)
+    kapt(libs.room.compiler)
+
+    //di
+    implementation(libs.hilt.core)
+    kapt(libs.hilt.compiler)
+
+    //testing
+    testImplementation(libs.bundles.testing.core)
+    androidTestImplementation(libs.bundles.testing.android)
+    implementation(libs.timber)*/
 }
