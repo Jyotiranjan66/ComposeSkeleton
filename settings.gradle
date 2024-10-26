@@ -1,0 +1,12 @@
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+rootProject.name = "Android Skeleton"
+enableFeaturePreview("VERSION_CATALOGS")
+
+include ':app', ':domain', ':data', ':test'
